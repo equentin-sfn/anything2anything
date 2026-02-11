@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+	--font-family-display: var(--font-display), "Georgia", serif;
+	--font-family-mono: var(--font-mono), "Menlo", monospace;
+	--font-family-body: var(--font-body), "Helvetica Neue", sans-serif;
+
+	--color-surface: #F8F7F4;
+	--color-ink: #171412;
+	--color-muted: #9C9590;
+	--color-subtle: #E8E4DF;
+	--color-accent: #C0582F;
+}
+
+@keyframes char-enter {
+	from {
+		opacity: 0;
+		transform: scale(0.85);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.animate-char-enter {
+	animation: char-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
