@@ -99,6 +99,10 @@ const volume: Unit[] = [
 	{ id: "gal-us", name: "Gallons (US)", symbol: "gal", category: "volume", toBase: 3.78541, mode: "all" },
 	{ id: "gal-uk", name: "Gallons (UK)", symbol: "gal", category: "volume", toBase: 4.54609, mode: "all" },
 	{ id: "cubic-metre", name: "Cubic metres", symbol: "m³", category: "volume", toBase: 1000, mode: "all" },
+	// Workshop / Garden
+	{ id: "bag-of-compost", name: "Bags of compost", symbol: "bags", category: "volume", toBase: 50, mode: "workshop" },
+	{ id: "bulk-bag", name: "Bulk bags", symbol: "bulk bags", category: "volume", toBase: 1000, mode: "workshop" },
+	{ id: "board-foot", name: "Board feet", symbol: "bf", category: "volume", toBase: 0.00235974, mode: "workshop" },
 	// Kitchen
 	{ id: "tsp", name: "Teaspoons", symbol: "tsp", category: "volume", toBase: 0.00492892, mode: "kitchen" },
 	{ id: "tbsp", name: "Tablespoons", symbol: "tbsp", category: "volume", toBase: 0.0147868, mode: "kitchen" },
@@ -121,6 +125,7 @@ const temperature: Unit[] = [
 	{ id: "c", name: "Celsius", symbol: "°C", category: "temperature", toBase: 1, mode: "all" },
 	{ id: "f", name: "Fahrenheit", symbol: "°F", category: "temperature", toBase: 1, mode: "all" },
 	{ id: "k", name: "Kelvin", symbol: "K", category: "temperature", toBase: 1, mode: "all" },
+	{ id: "gas-mark", name: "Gas Mark", symbol: "GM", category: "temperature", toBase: 1, mode: "kitchen" },
 ];
 
 // ─── Time (base: second) ────────────────────────────────────────────────────
@@ -165,6 +170,8 @@ const area: Unit[] = [
 	{ id: "wales", name: "Wales", symbol: "Wales", category: "area", toBase: 20_779_000_000, mode: "newsroom" },
 	{ id: "belgium", name: "Belgiums", symbol: "Belgiums", category: "area", toBase: 30_689_000_000, mode: "newsroom" },
 	{ id: "manhattan", name: "Manhattans", symbol: "Manhattans", category: "area", toBase: 59_100_000, mode: "newsroom" },
+	// Workshop
+	{ id: "wallpaper-roll", name: "Wallpaper rolls", symbol: "rolls", category: "area", toBase: 5.3265, mode: "workshop" },
 ];
 
 // ─── Speed (base: metres per second) ─────────────────────────────────────────
@@ -226,6 +233,8 @@ const angle: Unit[] = [
 	{ id: "degree", name: "Degrees", symbol: "°", category: "angle", toBase: 0.0174533, mode: "all" },
 	{ id: "radian", name: "Radians", symbol: "rad", category: "angle", toBase: 1, mode: "all" },
 	{ id: "turn", name: "Turns", symbol: "turns", category: "angle", toBase: 6.283185, mode: "all" },
+	// Workshop
+	{ id: "mitre-cut", name: "Mitre cut degrees", symbol: "mitre°", category: "angle", toBase: 0.0087266, mode: "workshop" },
 ];
 
 // ─── Typography (base: pixel) ────────────────────────────────────────────────
@@ -306,6 +315,9 @@ function convertTemperature(value: number, from: string, to: string): number {
 		case "k":
 			celsius = value - 273.15;
 			break;
+		case "gas-mark":
+			celsius = value * 14 + 121;
+			break;
 		default:
 			return value;
 	}
@@ -318,6 +330,8 @@ function convertTemperature(value: number, from: string, to: string): number {
 			return celsius * (9 / 5) + 32;
 		case "k":
 			return celsius + 273.15;
+		case "gas-mark":
+			return (celsius - 121) / 14;
 		default:
 			return celsius;
 	}
