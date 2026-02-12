@@ -271,6 +271,26 @@ export function getUnitsByCategory(category: Category): Unit[] {
 	return units.filter((u) => u.category === category);
 }
 
+export function getUnitsByCategoryAndMode(
+	category: Category,
+	mode: Mode | "everything",
+): Unit[] {
+	const catUnits = units.filter((u) => u.category === category);
+	if (mode === "everything") return catUnits;
+	return catUnits.filter((u) => u.mode === "all" || u.mode === mode);
+}
+
+export function getAvailableModesForCategory(category: Category): Mode[] {
+	const catUnits = units.filter((u) => u.category === category);
+	const modes = [...new Set(catUnits.map((u) => u.mode))];
+	// Sort: "all" first, then alphabetical
+	return modes.sort((a, b) => {
+		if (a === "all") return -1;
+		if (b === "all") return 1;
+		return a.localeCompare(b);
+	});
+}
+
 // ─── Conversion ──────────────────────────────────────────────────────────────
 
 function convertTemperature(value: number, from: string, to: string): number {
@@ -315,6 +335,22 @@ export function convert(value: number, from: Unit, to: Unit): number {
 	// value in source unit → base unit → target unit
 	const baseValue = value * from.toBase;
 	return baseValue / to.toBase;
+}
+
+export function formatCompact(value: number): string {
+	if (value === 0) return "0";
+	const abs = Math.abs(value);
+	if (abs >= 1000) {
+		return value.toLocaleString("en-GB", {
+			notation: "compact",
+			maximumSignificantDigits: 3,
+		} as Intl.NumberFormatOptions);
+	}
+	if (abs >= 100) return value.toLocaleString("en-GB", { maximumFractionDigits: 0 });
+	if (abs >= 10) return value.toLocaleString("en-GB", { maximumFractionDigits: 1 });
+	if (abs >= 1) return value.toLocaleString("en-GB", { maximumFractionDigits: 2 });
+	if (abs >= 0.01) return value.toLocaleString("en-GB", { maximumSignificantDigits: 3 });
+	return value.toLocaleString("en-GB", { maximumSignificantDigits: 2 });
 }
 
 export function formatResult(value: number): string {
