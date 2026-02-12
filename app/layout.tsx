@@ -25,7 +25,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
 	title: "anything2anything — convert any unit to any unit",
 	description:
-		"The unit converter that does everything. Teaspoons to millilitres. Miles to moon distances. No ads, no sign-up, just conversion.",
+		"The unit converter that does everything. Teaspoons to millilitres. Miles to moon distances. An eQuentin Experiment.",
 };
 
 export default function RootLayout({
