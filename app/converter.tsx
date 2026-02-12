@@ -11,7 +11,7 @@ import {
 	type Unit,
 } from "@/lib/units";
 
-const ITEM_HEIGHT = 52;
+const ITEM_HEIGHT = 48;
 const VISIBLE_ITEMS = 7;
 const WHEEL_HEIGHT = ITEM_HEIGHT * VISIBLE_ITEMS;
 const SPACER_HEIGHT = (WHEEL_HEIGHT - ITEM_HEIGHT) / 2;
@@ -77,7 +77,7 @@ function ScrollWheel({
 	}, [unitList.length, onSelect]);
 
 	const maskGradient =
-		"linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.08) 6%, rgba(0,0,0,0.25) 14%, rgba(0,0,0,0.5) 24%, black 40%, black 60%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0.25) 86%, rgba(0,0,0,0.08) 94%, transparent 100%)";
+		"linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.06) 4%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.5) 24%, black 38%, black 62%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0.2) 88%, rgba(0,0,0,0.06) 96%, transparent 100%)";
 
 	return (
 		<div
@@ -101,10 +101,10 @@ function ScrollWheel({
 				return (
 					<div
 						key={unit.id}
-						className={`flex items-center gap-1.5 sm:gap-2 transition-all duration-300 ease-out ${
+						className={`flex items-center gap-1.5 sm:gap-2 transition-all duration-200 ease-out border-b border-rule/40 ${
 							align === "right"
-								? "justify-end pr-3 sm:pr-4"
-								: "justify-start pl-3 sm:pl-4"
+								? "justify-end pr-3 sm:pr-5"
+								: "justify-start pl-3 sm:pl-5"
 						}`}
 						style={{
 							height: ITEM_HEIGHT,
@@ -112,19 +112,19 @@ function ScrollWheel({
 						}}
 					>
 						<span
-							className={`font-mono tabular-nums whitespace-nowrap transition-all duration-300 ${
+							className={`font-mono tabular-nums whitespace-nowrap transition-all duration-200 ${
 								isCenter
-									? "text-2xl sm:text-3xl md:text-4xl font-semibold text-ink"
-									: "text-sm sm:text-base text-ink/25"
+									? "text-xl sm:text-2xl md:text-3xl font-semibold text-ink"
+									: "text-xs sm:text-sm text-ink/20"
 							}`}
 						>
 							{value}
 						</span>
 						<span
-							className={`font-body uppercase transition-all duration-300 min-w-0 truncate ${
+							className={`font-body uppercase transition-all duration-200 min-w-0 truncate ${
 								isCenter
-									? "text-[10px] sm:text-xs tracking-[0.12em] font-medium text-accent"
-									: "text-[8px] sm:text-[10px] tracking-[0.08em] text-ink/15"
+									? "text-[9px] sm:text-[11px] tracking-[0.14em] font-medium text-accent"
+									: "text-[7px] sm:text-[9px] tracking-[0.08em] text-ink/12"
 							}`}
 						>
 							<span className="hidden sm:inline">
@@ -161,13 +161,13 @@ function CategoryNav({
 	}, [active]);
 
 	return (
-		<nav className="flex justify-center gap-4 sm:gap-6 overflow-x-auto hide-scrollbar px-4">
+		<nav className="flex justify-center gap-3 sm:gap-5 overflow-x-auto hide-scrollbar px-4">
 			{categories.map((cat) => (
 				<button
 					key={cat.id}
 					ref={active === cat.id ? activeRef : undefined}
 					onClick={() => onChange(cat.id)}
-					className={`text-xs font-body tracking-[0.1em] uppercase whitespace-nowrap pb-2 border-b transition-all duration-300 ${
+					className={`text-[10px] sm:text-xs font-body tracking-[0.14em] uppercase whitespace-nowrap pb-1.5 border-b transition-all duration-200 ${
 						active === cat.id
 							? "text-ink border-ink"
 							: "text-muted border-transparent hover:text-ink"
@@ -250,28 +250,33 @@ export function Converter() {
 					onChange={(e) => setInputValue(e.target.value)}
 					placeholder="0"
 					autoFocus
-					className="w-40 sm:w-56 text-center font-mono text-3xl sm:text-5xl font-medium bg-transparent outline-none placeholder:text-subtle text-ink [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+					className="w-40 sm:w-48 text-center font-mono text-3xl sm:text-4xl font-medium bg-transparent outline-none placeholder:text-subtle text-ink [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
 					style={{ caretColor: "var(--color-accent)" }}
 				/>
 			</div>
 
-			{/* Dual Scroll Wheels */}
-			<div className="relative">
-				{/* Center row indicator lines */}
+			{/* Tuning Window */}
+			<div
+				className="relative bg-panel rounded-sm overflow-hidden"
+				style={{
+					boxShadow:
+						"inset 0 1px 4px rgba(0,0,0,0.06), inset 0 0 1px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)",
+				}}
+			>
+				{/* Single accent indicator line — the tuning line */}
 				<div
 					className="absolute inset-x-0 pointer-events-none z-10"
-					style={{ top: SPACER_HEIGHT, height: ITEM_HEIGHT }}
+					style={{ top: SPACER_HEIGHT + ITEM_HEIGHT / 2 - 0.5 }}
 				>
-					<div className="h-px bg-subtle absolute top-0 inset-x-4 sm:inset-x-8" />
-					<div className="h-px bg-subtle absolute bottom-0 inset-x-4 sm:inset-x-8" />
+					<div className="h-px bg-accent/50 mx-3 sm:mx-5" />
 				</div>
 
-				{/* Equals sign — positioned at center row, above the mask */}
+				{/* Equals sign — positioned at center row */}
 				<div
 					className="absolute left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none"
 					style={{ top: SPACER_HEIGHT, height: ITEM_HEIGHT }}
 				>
-					<span className="text-xl sm:text-2xl font-display italic text-accent select-none">
+					<span className="text-base sm:text-lg font-display italic text-accent select-none">
 						=
 					</span>
 				</div>
@@ -288,7 +293,7 @@ export function Converter() {
 
 					{/* Spacer for equals sign */}
 					<div
-						className="flex-shrink-0 w-8 sm:w-12"
+						className="flex-shrink-0 w-6 sm:w-10"
 						style={{ height: WHEEL_HEIGHT }}
 					/>
 
@@ -305,7 +310,7 @@ export function Converter() {
 
 			{/* Sentence */}
 			{result !== null && fromUnit && toUnit && (
-				<p className="text-center font-display italic text-base sm:text-lg text-muted">
+				<p className="text-center font-display italic text-sm sm:text-base text-muted">
 					{inputValue} {fromUnit.name.toLowerCase()} ={" "}
 					{formatResult(result)} {toUnit.name.toLowerCase()}
 				</p>

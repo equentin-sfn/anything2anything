@@ -5,26 +5,13 @@
 	--font-family-mono: var(--font-mono), "Menlo", monospace;
 	--font-family-body: var(--font-body), "Helvetica Neue", sans-serif;
 
-	--color-surface: #F8F7F4;
-	--color-ink: #171412;
-	--color-muted: #9C9590;
-	--color-subtle: #E8E4DF;
+	--color-surface: #F5F4F1;
+	--color-panel: #F0EFEC;
+	--color-ink: #1A1816;
+	--color-muted: #918A84;
+	--color-subtle: #DDD9D4;
+	--color-rule: #E4E0DB;
 	--color-accent: #C0582F;
-}
-
-@keyframes char-enter {
-	from {
-		opacity: 0;
-		transform: scale(0.85);
-	}
-	to {
-		opacity: 1;
-		transform: scale(1);
-	}
-}
-
-.animate-char-enter {
-	animation: char-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .hide-scrollbar {
@@ -33,4 +20,17 @@
 }
 .hide-scrollbar::-webkit-scrollbar {
 	display: none;
+}
+
+/* Subtle noise texture on the body surface */
+body::before {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	opacity: 0.3;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+	background-repeat: repeat;
+	background-size: 256px 256px;
+	pointer-events: none;
 }

@@ -8,10 +8,10 @@ export default function Home() {
 					<span className="font-body text-xl sm:text-2xl font-light tracking-tight">
 						anything
 					</span>
-					<span className="font-display text-2xl sm:text-3xl italic text-accent mx-px">
+					<span className="font-display text-2xl sm:text-3xl italic text-accent mx-1">
 						2
 					</span>
-					<span className="font-body text-xl sm:text-2xl font-light tracking-tight">
+					<span className="font-display text-xl sm:text-2xl italic tracking-tight">
 						anything
 					</span>
 				</h1>
