@@ -44,7 +44,7 @@ function ScrollWheel({
 	const wheelRef = useRef<HTMLDivElement>(null);
 	const filterRef = useRef<HTMLInputElement>(null);
 	const isProgrammatic = useRef(false);
-	const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
+	const scrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const lastReported = useRef(selectedIndex);
 	const wasExpanded = useRef(false);
 
