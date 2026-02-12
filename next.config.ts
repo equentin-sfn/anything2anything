@@ -1,7 +1,15 @@
 import type { NextConfig } from "next";
 import { execSync } from "child_process";
 
-const commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+let commitHash = process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? "";
+
+if (!commitHash) {
+	try {
+		commitHash = execSync("git rev-parse --short HEAD").toString().trim();
+	} catch {
+		commitHash = "dev";
+	}
+}
 
 const nextConfig: NextConfig = {
 	env: {
