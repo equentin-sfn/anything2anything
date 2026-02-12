@@ -120,6 +120,9 @@ function ScrollWheel({
 	const maskGradient =
 		"linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.04) 4%, rgba(0,0,0,0.15) 12%, rgba(0,0,0,0.4) 22%, black 36%, black 64%, rgba(0,0,0,0.4) 78%, rgba(0,0,0,0.15) 88%, rgba(0,0,0,0.04) 96%, transparent 100%)";
 
+	const expandedMaskGradient =
+		"linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%)";
+
 	const showNumbers = !!getDisplayValue;
 
 	return (
@@ -133,10 +136,10 @@ function ScrollWheel({
 		>
 			{/* Filter input when expanded */}
 			<div
-				className={`absolute top-0 inset-x-0 z-30 bg-panel/95 backdrop-blur-sm border-b border-rule transition-all duration-300 ${
+				className={`absolute top-0 inset-x-0 z-30 transition-all duration-300 ${
 					isExpanded
 						? "opacity-100 translate-y-0"
-						: "opacity-0 -translate-y-1 pointer-events-none"
+						: "opacity-0 -translate-y-2 pointer-events-none"
 				}`}
 			>
 				<input
@@ -145,9 +148,10 @@ function ScrollWheel({
 					value={filterText}
 					onChange={(e) => onFilterChange(e.target.value)}
 					placeholder="Filter…"
-					className="w-full text-sm font-body tracking-wide px-4 py-3 bg-transparent outline-none text-ink placeholder:text-muted/60"
+					className="w-full text-xs font-body tracking-[0.12em] uppercase px-4 py-3 bg-transparent outline-none text-ink placeholder:text-muted/40"
 					onClick={(e) => e.stopPropagation()}
 				/>
+				<div className="h-px mx-4 bg-accent/25" />
 			</div>
 
 			{/* Wheel */}
@@ -159,8 +163,8 @@ function ScrollWheel({
 					height: WHEEL_HEIGHT,
 					scrollSnapType: isExpanded ? "none" : "y mandatory",
 					WebkitOverflowScrolling: "touch",
-					maskImage: isExpanded ? "none" : maskGradient,
-					WebkitMaskImage: isExpanded ? "none" : maskGradient,
+					maskImage: isExpanded ? expandedMaskGradient : maskGradient,
+					WebkitMaskImage: isExpanded ? expandedMaskGradient : maskGradient,
 				}}
 			>
 				<div style={{ height: SPACER_HEIGHT }} aria-hidden="true" />
@@ -183,10 +187,10 @@ function ScrollWheel({
 							}}
 							className={`flex items-center transition-all duration-300 ease-out ${
 								isExpanded
-									? `cursor-pointer px-4 ${
+									? `cursor-pointer px-4 border-l-2 ${
 											isSelected
-												? "bg-accent/[0.06]"
-												: "hover:bg-ink/[0.02]"
+												? "border-accent"
+												: "border-transparent hover:border-ink/10"
 										}`
 									: isCenter
 										? "cursor-pointer"
@@ -519,7 +523,7 @@ export function Converter() {
 				className="relative bg-panel rounded-sm overflow-hidden"
 				style={{
 					boxShadow:
-						"inset 0 1px 4px rgba(0,0,0,0.06), inset 0 0 1px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)",
+						"inset 0 2px 8px rgba(0,0,0,0.09), inset 0 1px 2px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px rgba(0,0,0,0.05)",
 				}}
 			>
 				{/* Indicator lines — the pay line */}
