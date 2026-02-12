@@ -24,17 +24,63 @@ function ScrollWheel({
 	onSelect,
 	getDisplayValue,
 	align,
+	isExpanded,
+	isReceded,
+	onExpandToggle,
+	filterText,
+	onFilterChange,
 }: {
 	unitList: Unit[];
 	selectedIndex: number;
 	onSelect: (index: number) => void;
 	getDisplayValue: (unit: Unit) => string;
 	align: "left" | "right";
+	isExpanded: boolean;
+	isReceded: boolean;
+	onExpandToggle: () => void;
+	filterText: string;
+	onFilterChange: (text: string) => void;
 }) {
 	const wheelRef = useRef<HTMLDivElement>(null);
+	const filterRef = useRef<HTMLInputElement>(null);
 	const isProgrammatic = useRef(false);
 	const scrollTimer = useRef<ReturnType<typeof setTimeout>>();
 	const lastReported = useRef(selectedIndex);
+	const wasExpanded = useRef(false);
+
+	// Filter units when expanded
+	const displayUnits =
+		isExpanded && filterText
+			? unitList.filter(
+					(u) =>
+						u.name.toLowerCase().includes(filterText.toLowerCase()) ||
+						u.symbol.toLowerCase().includes(filterText.toLowerCase()),
+				)
+			: unitList;
+
+	// Focus filter input when expanded
+	useEffect(() => {
+		if (isExpanded) {
+			const t = setTimeout(() => filterRef.current?.focus(), 50);
+			return () => clearTimeout(t);
+		}
+	}, [isExpanded]);
+
+	// Scroll to selected position when collapsing from expanded
+	useEffect(() => {
+		const wasExp = wasExpanded.current;
+		wasExpanded.current = isExpanded;
+
+		if (wasExp && !isExpanded && wheelRef.current) {
+			isProgrammatic.current = true;
+			lastReported.current = selectedIndex;
+			wheelRef.current.scrollTop = selectedIndex * ITEM_HEIGHT;
+			const t = setTimeout(() => {
+				isProgrammatic.current = false;
+			}, 150);
+			return () => clearTimeout(t);
+		}
+	}, [isExpanded, selectedIndex]);
 
 	// Scroll to position on mount
 	useEffect(() => {
@@ -62,7 +108,7 @@ function ScrollWheel({
 	}, [unitList]);
 
 	const handleScroll = useCallback(() => {
-		if (!wheelRef.current || isProgrammatic.current) return;
+		if (!wheelRef.current || isProgrammatic.current || isExpanded) return;
 
 		clearTimeout(scrollTimer.current);
 		scrollTimer.current = setTimeout(() => {
@@ -74,69 +120,144 @@ function ScrollWheel({
 				onSelect(clamped);
 			}
 		}, 60);
-	}, [unitList.length, onSelect]);
+	}, [unitList.length, onSelect, isExpanded]);
 
 	const maskGradient =
 		"linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.06) 4%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.5) 24%, black 38%, black 62%, rgba(0,0,0,0.5) 76%, rgba(0,0,0,0.2) 88%, rgba(0,0,0,0.06) 96%, transparent 100%)";
 
 	return (
 		<div
-			ref={wheelRef}
-			onScroll={handleScroll}
-			className="overflow-y-auto hide-scrollbar flex-1 will-change-scroll"
-			style={{
-				height: WHEEL_HEIGHT,
-				scrollSnapType: "y mandatory",
-				WebkitOverflowScrolling: "touch",
-				maskImage: maskGradient,
-				WebkitMaskImage: maskGradient,
-			}}
+			className={`relative flex-1 transition-all duration-300 ${
+				isReceded
+					? "opacity-15 pointer-events-none scale-[0.98]"
+					: "opacity-100 scale-100"
+			}`}
 		>
-			<div style={{ height: SPACER_HEIGHT }} aria-hidden="true" />
+			{/* Filter input — overlays top of wheel when expanded */}
+			<div
+				className={`absolute top-0 inset-x-0 z-30 bg-panel/95 backdrop-blur-sm border-b border-rule transition-all duration-300 ${
+					isExpanded
+						? "opacity-100 translate-y-0"
+						: "opacity-0 -translate-y-1 pointer-events-none"
+				}`}
+			>
+				<input
+					ref={filterRef}
+					type="text"
+					value={filterText}
+					onChange={(e) => onFilterChange(e.target.value)}
+					placeholder="Filter…"
+					className={`w-full text-xs font-body tracking-wide px-3 sm:px-5 py-3 bg-transparent outline-none text-ink placeholder:text-muted/60 ${
+						align === "right" ? "text-right" : "text-left"
+					}`}
+					onClick={(e) => e.stopPropagation()}
+				/>
+			</div>
 
-			{unitList.map((unit, i) => {
-				const isCenter = i === selectedIndex;
-				const value = getDisplayValue(unit);
+			{/* Wheel */}
+			<div
+				ref={wheelRef}
+				onScroll={handleScroll}
+				className="overflow-y-auto hide-scrollbar will-change-scroll"
+				style={{
+					height: WHEEL_HEIGHT,
+					scrollSnapType: isExpanded ? "none" : "y mandatory",
+					WebkitOverflowScrolling: "touch",
+					maskImage: isExpanded ? "none" : maskGradient,
+					WebkitMaskImage: isExpanded ? "none" : maskGradient,
+				}}
+			>
+				<div style={{ height: SPACER_HEIGHT }} aria-hidden="true" />
 
-				return (
-					<div
-						key={unit.id}
-						className={`flex items-center gap-1.5 sm:gap-2 transition-all duration-200 ease-out border-b border-rule/40 ${
-							align === "right"
-								? "justify-end pr-3 sm:pr-5"
-								: "justify-start pl-3 sm:pl-5"
-						}`}
-						style={{
-							height: ITEM_HEIGHT,
-							scrollSnapAlign: "center",
-						}}
-					>
-						<span
-							className={`font-mono tabular-nums whitespace-nowrap transition-all duration-200 ${
-								isCenter
-									? "text-xl sm:text-2xl md:text-3xl font-semibold text-ink"
-									: "text-xs sm:text-sm text-ink/20"
+				{displayUnits.map((unit) => {
+					const originalIndex = unitList.indexOf(unit);
+					const isSelected = originalIndex === selectedIndex;
+					const isCenter = !isExpanded && isSelected;
+					const value = getDisplayValue(unit);
+
+					return (
+						<div
+							key={unit.id}
+							onClick={() => {
+								if (isExpanded) {
+									onSelect(originalIndex);
+									onExpandToggle();
+								} else if (isCenter) {
+									onExpandToggle();
+								}
+							}}
+							className={`flex items-center gap-1.5 sm:gap-2 transition-all duration-300 ease-out border-b border-rule/40 ${
+								isExpanded
+									? `cursor-pointer ${
+											isSelected
+												? "bg-accent/[0.06]"
+												: "hover:bg-ink/[0.02]"
+										}`
+									: isCenter
+										? "cursor-pointer"
+										: ""
+							} ${
+								align === "right"
+									? "justify-end pr-3 sm:pr-5"
+									: "justify-start pl-3 sm:pl-5"
 							}`}
+							style={{
+								height: ITEM_HEIGHT,
+								scrollSnapAlign: isExpanded ? undefined : "center",
+							}}
 						>
-							{value}
-						</span>
-						<span
-							className={`font-body uppercase transition-all duration-200 min-w-0 truncate ${
-								isCenter
-									? "text-[9px] sm:text-[11px] tracking-[0.14em] font-medium text-accent"
-									: "text-[7px] sm:text-[9px] tracking-[0.08em] text-ink/12"
-							}`}
-						>
-							<span className="hidden sm:inline">
-								{unit.name}
+							<span
+								className={`font-mono tabular-nums whitespace-nowrap transition-all duration-300 ${
+									isExpanded
+										? isSelected
+											? "text-sm sm:text-base font-semibold text-ink"
+											: "text-sm sm:text-base text-ink/60"
+										: isCenter
+											? "text-xl sm:text-2xl md:text-3xl font-semibold text-ink"
+											: "text-xs sm:text-sm text-ink/20"
+								}`}
+							>
+								{value}
 							</span>
-							<span className="sm:hidden">{unit.symbol}</span>
-						</span>
-					</div>
-				);
-			})}
+							<span
+								className={`font-body uppercase transition-all duration-300 min-w-0 truncate ${
+									isExpanded
+										? isSelected
+											? "text-[10px] sm:text-xs tracking-[0.12em] font-medium text-accent"
+											: "text-[10px] sm:text-xs tracking-[0.10em] text-ink/40"
+										: isCenter
+											? "text-[9px] sm:text-[11px] tracking-[0.14em] font-medium text-accent"
+											: "text-[7px] sm:text-[9px] tracking-[0.08em] text-ink/12"
+								}`}
+							>
+								{isExpanded ? (
+									unit.name
+								) : (
+									<>
+										<span className="hidden sm:inline">
+											{unit.name}
+										</span>
+										<span className="sm:hidden">
+											{unit.symbol}
+										</span>
+									</>
+								)}
+							</span>
+						</div>
+					);
+				})}
 
-			<div style={{ height: SPACER_HEIGHT }} aria-hidden="true" />
+				{displayUnits.length === 0 && isExpanded && (
+					<div
+						className="flex items-center justify-center text-xs text-muted font-body"
+						style={{ height: ITEM_HEIGHT }}
+					>
+						No matches
+					</div>
+				)}
+
+				<div style={{ height: SPACER_HEIGHT }} aria-hidden="true" />
+			</div>
 		</div>
 	);
 }
@@ -187,6 +308,11 @@ export function Converter() {
 	const [fromId, setFromId] = useState("km");
 	const [toId, setToId] = useState("mi");
 	const [inputValue, setInputValue] = useState("");
+	const [expandedWheel, setExpandedWheel] = useState<"from" | "to" | null>(
+		null,
+	);
+	const [filterText, setFilterText] = useState("");
+	const panelRef = useRef<HTMLDivElement>(null);
 
 	const categoryUnits = useMemo(
 		() => getUnitsByCategory(category),
@@ -212,12 +338,35 @@ export function Converter() {
 		[inputValue, fromUnit],
 	);
 
+	// Click-outside handler to collapse expanded wheel
+	useEffect(() => {
+		if (!expandedWheel) return;
+		function handleClickOutside(e: MouseEvent) {
+			if (
+				panelRef.current &&
+				!panelRef.current.contains(e.target as Node)
+			) {
+				setExpandedWheel(null);
+				setFilterText("");
+			}
+		}
+		const t = setTimeout(() => {
+			document.addEventListener("mousedown", handleClickOutside);
+		}, 10);
+		return () => {
+			clearTimeout(t);
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [expandedWheel]);
+
 	function handleCategoryChange(newCategory: Category) {
 		setCategory(newCategory);
 		const newUnits = getUnitsByCategory(newCategory);
 		setFromId(newUnits[0]?.id ?? "");
 		setToId(newUnits[1]?.id ?? newUnits[0]?.id ?? "");
 		setInputValue("");
+		setExpandedWheel(null);
+		setFilterText("");
 	}
 
 	function handleFromSelect(index: number) {
@@ -228,6 +377,16 @@ export function Converter() {
 	function handleToSelect(index: number) {
 		const unit = categoryUnits[index];
 		if (unit) setToId(unit.id);
+	}
+
+	function handleExpandToggle(wheel: "from" | "to") {
+		if (expandedWheel === wheel) {
+			setExpandedWheel(null);
+			setFilterText("");
+		} else {
+			setExpandedWheel(wheel);
+			setFilterText("");
+		}
 	}
 
 	const toUnit = categoryUnits[toIndex];
@@ -242,7 +401,11 @@ export function Converter() {
 			<CategoryNav active={category} onChange={handleCategoryChange} />
 
 			{/* Input */}
-			<div className="text-center">
+			<div
+				className={`text-center transition-opacity duration-300 ${
+					expandedWheel ? "opacity-30" : "opacity-100"
+				}`}
+			>
 				<input
 					type="number"
 					inputMode="decimal"
@@ -257,6 +420,7 @@ export function Converter() {
 
 			{/* Tuning Window */}
 			<div
+				ref={panelRef}
 				className="relative bg-panel rounded-sm overflow-hidden"
 				style={{
 					boxShadow:
@@ -265,15 +429,21 @@ export function Converter() {
 			>
 				{/* Single accent indicator line — the tuning line */}
 				<div
-					className="absolute inset-x-0 pointer-events-none z-10"
-					style={{ top: SPACER_HEIGHT + ITEM_HEIGHT / 2 - 0.5 }}
+					className={`absolute inset-x-0 pointer-events-none z-10 transition-opacity duration-300 ${
+						expandedWheel ? "opacity-0" : "opacity-100"
+					}`}
+					style={{
+						top: SPACER_HEIGHT + ITEM_HEIGHT / 2 - 0.5,
+					}}
 				>
 					<div className="h-px bg-accent/50 mx-3 sm:mx-5" />
 				</div>
 
 				{/* Equals sign — positioned at center row */}
 				<div
-					className="absolute left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none"
+					className={`absolute left-1/2 -translate-x-1/2 z-20 flex items-center justify-center pointer-events-none transition-opacity duration-300 ${
+						expandedWheel ? "opacity-0" : "opacity-100"
+					}`}
 					style={{ top: SPACER_HEIGHT, height: ITEM_HEIGHT }}
 				>
 					<span className="text-base sm:text-lg font-display italic text-accent select-none">
@@ -289,11 +459,20 @@ export function Converter() {
 						onSelect={handleFromSelect}
 						getDisplayValue={getDisplayValue}
 						align="right"
+						isExpanded={expandedWheel === "from"}
+						isReceded={expandedWheel === "to"}
+						onExpandToggle={() => handleExpandToggle("from")}
+						filterText={
+							expandedWheel === "from" ? filterText : ""
+						}
+						onFilterChange={setFilterText}
 					/>
 
 					{/* Spacer for equals sign */}
 					<div
-						className="flex-shrink-0 w-6 sm:w-10"
+						className={`flex-shrink-0 transition-all duration-300 overflow-hidden ${
+							expandedWheel ? "w-0" : "w-6 sm:w-10"
+						}`}
 						style={{ height: WHEEL_HEIGHT }}
 					/>
 
@@ -304,17 +483,30 @@ export function Converter() {
 						onSelect={handleToSelect}
 						getDisplayValue={getDisplayValue}
 						align="left"
+						isExpanded={expandedWheel === "to"}
+						isReceded={expandedWheel === "from"}
+						onExpandToggle={() => handleExpandToggle("to")}
+						filterText={
+							expandedWheel === "to" ? filterText : ""
+						}
+						onFilterChange={setFilterText}
 					/>
 				</div>
 			</div>
 
 			{/* Sentence */}
-			{result !== null && fromUnit && toUnit && (
-				<p className="text-center font-display italic text-sm sm:text-base text-muted">
-					{inputValue} {fromUnit.name.toLowerCase()} ={" "}
-					{formatResult(result)} {toUnit.name.toLowerCase()}
-				</p>
-			)}
+			<div
+				className={`transition-opacity duration-300 ${
+					expandedWheel ? "opacity-0" : "opacity-100"
+				}`}
+			>
+				{result !== null && fromUnit && toUnit && (
+					<p className="text-center font-display italic text-sm sm:text-base text-muted">
+						{inputValue} {fromUnit.name.toLowerCase()} ={" "}
+						{formatResult(result)} {toUnit.name.toLowerCase()}
+					</p>
+				)}
+			</div>
 		</div>
 	);
 }
