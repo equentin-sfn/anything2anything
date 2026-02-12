@@ -12,6 +12,7 @@ if (!commitHash) {
 }
 
 const nextConfig: NextConfig = {
+	output: "export",
 	env: {
 		NEXT_PUBLIC_COMMIT_SHA: commitHash,
 	},
