@@ -21,10 +21,15 @@ export default function Home() {
 				</div>
 			</div>
 
-			<footer className="py-6 text-center">
+			<footer className="py-6 text-center space-y-1">
 				<p className="text-[10px] font-body text-muted tracking-[0.25em] uppercase">
-					No ads · No sign-up · Just conversion
+					An eQuentin Experiment
 				</p>
+				{process.env.NEXT_PUBLIC_COMMIT_SHA && (
+					<p className="text-[9px] font-mono text-muted/50 tracking-wider">
+						v{process.env.NEXT_PUBLIC_COMMIT_SHA}
+					</p>
+				)}
 			</footer>
 		</main>
 	);
