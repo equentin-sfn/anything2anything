@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, JetBrains_Mono, DM_Sans } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, DM_Sans, Jost } from "next/font/google";
 import "./globals.css";
 
 const instrumentSerif = Instrument_Serif({
@@ -22,6 +22,12 @@ const dmSans = DM_Sans({
 	display: "swap",
 });
 
+const jost = Jost({
+	subsets: ["latin"],
+	variable: "--font-logo",
+	display: "swap",
+});
+
 export const metadata: Metadata = {
 	title: "anything2anything — convert any unit to any unit",
 	description:
@@ -36,7 +42,7 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body
-				className={`${instrumentSerif.variable} ${jetbrainsMono.variable} ${dmSans.variable} font-body antialiased bg-surface text-ink`}
+				className={`${instrumentSerif.variable} ${jetbrainsMono.variable} ${dmSans.variable} ${jost.variable} font-body antialiased bg-surface text-ink`}
 			>
 				{children}
 			</body>

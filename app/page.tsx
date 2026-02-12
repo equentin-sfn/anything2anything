@@ -4,14 +4,19 @@ export default function Home() {
 	return (
 		<main className="min-h-svh flex flex-col">
 			<div className="flex-1 flex flex-col items-center justify-center px-6 py-8 sm:py-12">
-				<h1 className="mb-6 sm:mb-10 select-none">
-					<span className="font-body text-xl sm:text-2xl font-light tracking-tight">
+				<h1 className="mb-6 sm:mb-10 select-none flex flex-col items-center gap-2 sm:gap-3">
+					{/* A2A Mark */}
+					<img
+						src="/logo-mark.png"
+						alt="A2A"
+						className="w-12 h-12 sm:w-16 sm:h-16"
+					/>
+					{/* Wordmark */}
+					<span className="text-[10px] sm:text-xs tracking-[0.18em] text-muted lowercase" style={{ fontFamily: "var(--font-logo), sans-serif" }}>
 						anything
-					</span>
-					<span className="font-display text-2xl sm:text-3xl italic text-accent mx-1">
-						2
-					</span>
-					<span className="font-display text-xl sm:text-2xl italic tracking-tight">
+						<span className="font-display italic text-accent mx-px">
+							2
+						</span>
 						anything
 					</span>
 				</h1>
