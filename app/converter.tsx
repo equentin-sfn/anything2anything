@@ -346,7 +346,7 @@ function ModeNav({
 					onClick={() => onChange(mode)}
 					className={`text-[10px] sm:text-xs font-body tracking-[0.10em] uppercase whitespace-nowrap px-2.5 py-1 rounded-full transition-all duration-200 ${
 						active === mode
-							? "bg-ink text-surface"
+							? "bg-ink text-[#F5F4F1]"
 							: "text-muted hover:text-ink"
 					}`}
 				>

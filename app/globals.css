@@ -5,11 +5,11 @@
 	--font-family-mono: var(--font-mono), "Menlo", monospace;
 	--font-family-body: var(--font-body), "Helvetica Neue", sans-serif;
 
-	--color-surface: #F5F4F1;
+	--color-surface: #C8CEC9;
 	--color-panel: #F0EFEC;
 	--color-ink: #1A1816;
-	--color-muted: #918A84;
-	--color-subtle: #DDD9D4;
+	--color-muted: #6B655F;
+	--color-subtle: #A9A49E;
 	--color-rule: #E4E0DB;
 	--color-accent: #C0582F;
 }
