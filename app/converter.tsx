@@ -28,8 +28,6 @@ function ScrollWheel({
 	isExpanded,
 	isReceded,
 	onExpandToggle,
-	filterText,
-	onFilterChange,
 	align,
 }: {
 	unitList: Unit[];
@@ -39,32 +37,15 @@ function ScrollWheel({
 	isExpanded: boolean;
 	isReceded: boolean;
 	onExpandToggle: () => void;
-	filterText: string;
-	onFilterChange: (text: string) => void;
 	align: "left" | "right";
 }) {
 	const wheelRef = useRef<HTMLDivElement>(null);
-	const filterRef = useRef<HTMLInputElement>(null);
 	const isProgrammatic = useRef(false);
 	const scrollTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const lastReported = useRef(selectedIndex);
 	const wasExpanded = useRef(false);
 
-	const displayUnits =
-		isExpanded && filterText
-			? unitList.filter(
-					(u) =>
-						u.name.toLowerCase().includes(filterText.toLowerCase()) ||
-						u.symbol.toLowerCase().includes(filterText.toLowerCase()),
-				)
-			: unitList;
-
-	useEffect(() => {
-		if (isExpanded) {
-			const t = setTimeout(() => filterRef.current?.focus(), 50);
-			return () => clearTimeout(t);
-		}
-	}, [isExpanded]);
+	const displayUnits = unitList;
 
 	useEffect(() => {
 		const wasExp = wasExpanded.current;
@@ -129,30 +110,10 @@ function ScrollWheel({
 		<div
 			className={`relative transition-all duration-300 ${
 				isReceded
-					? "opacity-15 pointer-events-none scale-[0.98]"
-					: "opacity-100 scale-100"
+					? "opacity-30 pointer-events-none"
+					: "opacity-100"
 			}`}
-			style={{ flex: isExpanded ? "1 1 100%" : undefined }}
 		>
-			{/* Filter input when expanded */}
-			<div
-				className={`absolute top-0 inset-x-0 z-30 transition-all duration-300 ${
-					isExpanded
-						? "opacity-100 translate-y-0"
-						: "opacity-0 -translate-y-2 pointer-events-none"
-				}`}
-			>
-				<input
-					ref={filterRef}
-					type="text"
-					value={filterText}
-					onChange={(e) => onFilterChange(e.target.value)}
-					placeholder="Filter…"
-					className="w-full text-xs font-body tracking-[0.12em] uppercase px-4 py-3 bg-transparent outline-none text-ink placeholder:text-muted/40"
-					onClick={(e) => e.stopPropagation()}
-				/>
-				<div className="h-px mx-4 bg-accent/25" />
-			</div>
 
 			{/* Wheel */}
 			<div
@@ -372,7 +333,6 @@ export function Converter() {
 	const [expandedWheel, setExpandedWheel] = useState<"from" | "to" | null>(
 		null,
 	);
-	const [filterText, setFilterText] = useState("");
 	const panelRef = useRef<HTMLDivElement>(null);
 
 	const availableModes = useMemo(
@@ -414,7 +374,7 @@ export function Converter() {
 				!panelRef.current.contains(e.target as Node)
 			) {
 				setExpandedWheel(null);
-				setFilterText("");
+		
 			}
 		}
 		const t = setTimeout(() => {
@@ -439,7 +399,7 @@ export function Converter() {
 		setToId(newUnits[1]?.id ?? newUnits[0]?.id ?? "");
 		setInputValue("");
 		setExpandedWheel(null);
-		setFilterText("");
+
 	}
 
 	function handleModeChange(newMode: Mode | "everything") {
@@ -451,7 +411,7 @@ export function Converter() {
 		if (!fromStillExists) setFromId(newUnits[0]?.id ?? "");
 		if (!toStillExists) setToId(newUnits[1]?.id ?? newUnits[0]?.id ?? "");
 		setExpandedWheel(null);
-		setFilterText("");
+
 	}
 
 	function handleFromSelect(index: number) {
@@ -467,10 +427,10 @@ export function Converter() {
 	function handleExpandToggle(wheel: "from" | "to") {
 		if (expandedWheel === wheel) {
 			setExpandedWheel(null);
-			setFilterText("");
+	
 		} else {
 			setExpandedWheel(wheel);
-			setFilterText("");
+	
 		}
 	}
 
@@ -520,11 +480,7 @@ export function Converter() {
 			{/* Fruit Machine Tuning Window */}
 			<div
 				ref={panelRef}
-				className="relative bg-panel rounded-sm overflow-hidden"
-				style={{
-					boxShadow:
-						"inset 0 2px 8px rgba(0,0,0,0.09), inset 0 1px 2px rgba(0,0,0,0.07), 0 1px 0 rgba(255,255,255,0.45), 0 0 0 1px rgba(0,0,0,0.05)",
-				}}
+				className="relative overflow-hidden border border-ink/10"
 			>
 				{/* Indicator lines — the pay line */}
 				<div
@@ -545,8 +501,8 @@ export function Converter() {
 				<div className="flex items-start">
 					{/* Column 1: Static input number */}
 					<div
-						className={`flex-shrink-0 relative transition-all duration-300 ${
-							expandedWheel ? "w-0 opacity-0 overflow-hidden" : "w-16 sm:w-24 opacity-100"
+						className={`flex-shrink-0 relative transition-opacity duration-300 w-16 sm:w-24 ${
+							expandedWheel ? "opacity-30" : "opacity-100"
 						}`}
 						style={{ height: WHEEL_HEIGHT }}
 					>
@@ -561,15 +517,7 @@ export function Converter() {
 					</div>
 
 					{/* Column 2: FROM unit wheel (names only) */}
-					<div
-						className={`transition-all duration-300 overflow-hidden ${
-							expandedWheel === "from"
-								? "flex-1"
-								: expandedWheel === "to"
-									? "w-0 opacity-0"
-									: "w-28 sm:w-36 md:w-44"
-						}`}
-					>
+					<div className="w-28 sm:w-36 md:w-44 overflow-hidden">
 						<ScrollWheel
 							unitList={filteredUnits}
 							selectedIndex={fromIndex}
@@ -577,18 +525,14 @@ export function Converter() {
 							isExpanded={expandedWheel === "from"}
 							isReceded={expandedWheel === "to"}
 							onExpandToggle={() => handleExpandToggle("from")}
-							filterText={
-								expandedWheel === "from" ? filterText : ""
-							}
-							onFilterChange={setFilterText}
 							align="left"
 						/>
 					</div>
 
 					{/* Column 3: Equals divider */}
 					<div
-						className={`flex-shrink-0 relative transition-all duration-300 ${
-							expandedWheel ? "w-0 opacity-0 overflow-hidden" : "w-8 sm:w-10 opacity-100"
+						className={`flex-shrink-0 relative transition-opacity duration-300 w-8 sm:w-10 ${
+							expandedWheel ? "opacity-30" : "opacity-100"
 						}`}
 						style={{ height: WHEEL_HEIGHT }}
 					>
@@ -618,15 +562,7 @@ export function Converter() {
 					</div>
 
 					{/* Column 4: TO answer wheel (numbers + unit names) */}
-					<div
-						className={`transition-all duration-300 overflow-hidden ${
-							expandedWheel === "to"
-								? "flex-1"
-								: expandedWheel === "from"
-									? "w-0 opacity-0"
-									: "flex-1"
-						}`}
-					>
+					<div className="flex-1 overflow-hidden">
 						<ScrollWheel
 							unitList={filteredUnits}
 							selectedIndex={toIndex}
@@ -635,10 +571,6 @@ export function Converter() {
 							isExpanded={expandedWheel === "to"}
 							isReceded={expandedWheel === "from"}
 							onExpandToggle={() => handleExpandToggle("to")}
-							filterText={
-								expandedWheel === "to" ? filterText : ""
-							}
-							onFilterChange={setFilterText}
 							align="left"
 						/>
 					</div>
